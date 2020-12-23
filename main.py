@@ -37,9 +37,9 @@ REQUEST_CURRENT_RESULTS = "Please enter your actual results for the modules take
                           + "in the following format:" + NEWLINE \
                           + MODULE_ENTRY_FORMAT + SPACE + MODULE_ENTRY_EXAMPLE + NEWLINE
 
-SEMESTER_GPA_PREFIX = "Semester GPA: "
+SEMESTER_GPA_PREFIX = "------\nSemester GPA: "
 
-CUMULATIVE_GPA_PREFIX = "Cumulative GPA: "
+CUMULATIVE_GPA_PREFIX = "\nCumulative GPA: "
 
 REQUEST_SU_BALANCE = "Please enter your remaining S/U balance (in terms of number of modular credits). "
 
@@ -130,7 +130,7 @@ def to_letter_grade(letter_grade_string: str):
 def receive_results(num: int):
     modules = []
     for i in range(num):
-        args = input("Module " + str(i + 1) + ":").split()
+        args = input("Module " + str(i + 1) + ": ").split()
         module = Module(args[0], to_letter_grade(args[1]), int(args[2]))
         modules.append(module)
     return modules
@@ -195,7 +195,7 @@ while True:
     current_semester_gpa = calculate_semester_gpa(current_results)
     current_cumulative_gpa = calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)
     print(SEMESTER_GPA_PREFIX + str(current_semester_gpa))
-    print(CUMULATIVE_GPA_PREFIX + str(current_cumulative_gpa))
+    print(CUMULATIVE_GPA_PREFIX + str(current_cumulative_gpa) + "\n")
 
     # Print all available S/U combinations
     combinations = get_module_subsets(current_results)
