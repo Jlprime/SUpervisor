@@ -24,7 +24,7 @@ FIRST_SEMESTER_CONDITION_MESSAGE = "If this is your first semester, input 0."
 REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginning of this semester." \
                                + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
 
-REQUEST_PRIOR_CREDITS = "Please enter the number of credits earned at the beginning of this semester." \
+REQUEST_PRIOR_CREDITS = "Please enter the number of credits contributing to your CAP at the beginning of this semester." \
                         + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
 
 REQUEST_NUM_CURRENT_MODULES = "Please enter the number of modules taken this semester."
@@ -76,11 +76,34 @@ class Module():
         return self.credits
 
     def su(self):
-        su_grade = LetterGrade.S if self.letter_grade.value >= LetterGrade.C.value else LetterGrade.U
+        su_grade = LetterGrade.S if (self.letter_grade.value >= LetterGrade.C.value) else LetterGrade.U
         return Module(self.module_code, su_grade, 0)
 
     def is_sued(self):
         return self.letter_grade is LetterGrade.S or self.letter_grade is LetterGrade.U
+
+
+class SuCombination():
+    def __init__(self, original_results: iter, selected_results_to_su: iter):
+        self.original_results = original_results
+        self.selected_results_to_su = selected_results_to_su
+        self.new_results = su_modules(original_results, selected_results_to_su)
+
+    def get_new_semester_gpa(self):
+        return calculate_semester_gpa(self.new_results)
+
+    def get_new_cumulative_gpa(self):
+        return calculate_cumulative_gpa(self.new_results, prior_cumulative_gpa, prior_credits)
+
+    def get_sued_module_codes_str(self):
+        return str(list(map(lambda m: m.get_module_code(), self.selected_results_to_su))) \
+            if self.selected_results_to_su else "nothing"
+
+    def get_statistics_str(self):
+        return "If you S/U " + self.get_sued_module_codes_str() \
+               + ", your semester and cumulative GPA will be " \
+               + str(self.get_new_semester_gpa()) + " and " \
+               + str(self.get_new_cumulative_gpa()) + " respectively."
 
 
 def to_letter_grade(letter_grade_string: str):
@@ -137,7 +160,7 @@ def get_module_subsets(modules: list):
     return list(itertools.chain.from_iterable(itertools.combinations(modules, r) for r in range(len(modules) + 1)))
 
 
-def exceeds_su_balance(selected_modules_to_su, balance):
+def has_exceeded_su_balance(selected_modules_to_su, balance):
     return sum(map(lambda module: module.get_credits(), selected_modules_to_su)) > balance
 
 
@@ -162,26 +185,20 @@ print(REQUEST_CURRENT_RESULTS)
 current_results = receive_results(num_current_modules)
 
 # Output current semester and cumulative GPA
-print(SEMESTER_GPA_PREFIX + str(calculate_semester_gpa(current_results)))
-print(CUMULATIVE_GPA_PREFIX + str(calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)))
+current_semester_gpa = calculate_semester_gpa(current_results)
+current_cumulative_gpa = calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)
+print(SEMESTER_GPA_PREFIX + str(current_semester_gpa))
+print(CUMULATIVE_GPA_PREFIX + str(current_cumulative_gpa))
 
 # Print all available S/U combinations
 combinations = get_module_subsets(current_results)
-
 for combination in combinations:
-
-    # Check if selected modules to S/U exceeds your S/U balance
-    if exceeds_su_balance(combination, su_balance):
+    if has_exceeded_su_balance(combination, su_balance):
         continue
+    su_combination = SuCombination(current_results, combination)
+    is_useful = su_combination.get_new_semester_gpa() >= current_semester_gpa \
+                and su_combination.get_new_cumulative_gpa() >= current_cumulative_gpa
+    if is_useful:
+        print(su_combination.get_statistics_str())
 
-    # Replace selected modules in results list with their S/U-ed version
-    new_results = su_modules(current_results, combination)
-
-    new_semester_gpa = calculate_semester_gpa(new_results)
-    new_cumulative_gpa = calculate_cumulative_gpa(new_results, prior_cumulative_gpa, prior_credits)
-
-    module_code_list_str = str(list(map(lambda m: m.get_module_code(), combination))) if combination else "nothing"
-    print("If you S/U " + module_code_list_str
-          + ", your semester and cumulative GPA will be "
-          + str(new_semester_gpa) + " and " + str(new_cumulative_gpa) + " respectively.")
 
