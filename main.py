@@ -43,6 +43,8 @@ CUMULATIVE_GPA_PREFIX = "Cumulative GPA: "
 
 REQUEST_SU_BALANCE = "Please enter your remaining S/U balance (in terms of number of modular credits)."
 
+MAX_CAP = 5.0
+
 
 class LetterGrade(Enum):
     A_PLUS = 5.0
@@ -142,6 +144,8 @@ def calculate_semester_gpa(modules: list):
             continue
         grade_credit_product += module.get_letter_grade().value * module.get_credits()
         credit_sum += module.get_credits()
+    if credit_sum == 0:
+        return MAX_CAP
     return float(grade_credit_product) / float(credit_sum)
 
 
@@ -153,6 +157,8 @@ def calculate_cumulative_gpa(modules: list, prior_cum_gpa: float, prior_credits:
             continue
         grade_credit_product += module.get_letter_grade().value * module.get_credits()
         credit_sum += module.get_credits()
+    if credit_sum == 0:
+        return MAX_CAP
     return float(grade_credit_product) / float(credit_sum)
 
 
