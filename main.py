@@ -10,21 +10,38 @@ Sketch of algorithm:
 6. For each combination, SUpervisor calculates current semester CAP, cumulative CAP.
 7. SUpervisor outputs the top 3 optimal options.
 """
+
 from enum import Enum
+import itertools
 
 NEWLINE = "\n"
 SPACE = " "
+
 WELCOME_MESSAGE = "Welcome to SUpervisor!"
-REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginning of this semester."
-REQUEST_PRIOR_CREDITS = "Please enter the number of credits earned at the beginning of this semester."
+
+FIRST_SEMESTER_CONDITION_MESSAGE = "If this is your first semester, input 0."
+
+REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginning of this semester." \
+                               + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
+
+REQUEST_PRIOR_CREDITS = "Please enter the number of credits earned at the beginning of this semester." \
+                        + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
+
 REQUEST_NUM_CURRENT_MODULES = "Please enter the number of modules taken this semester."
+
 MODULE_ENTRY_FORMAT = "[MODULE CODE] [LETTER GRADE] [NO. OF MODULAR CREDITS]"
+
 MODULE_ENTRY_EXAMPLE = "e.g. CS1101S B+ 4"
+
 REQUEST_CURRENT_RESULTS = "Please enter your actual results for the modules taken this semester, " \
                           + "in the following format:" + NEWLINE \
                           + MODULE_ENTRY_FORMAT + SPACE + MODULE_ENTRY_EXAMPLE + NEWLINE
+
 SEMESTER_GPA_PREFIX = "Semester GPA: "
+
 CUMULATIVE_GPA_PREFIX = "Cumulative GPA: "
+
+REQUEST_SU_BALANCE = "Please enter your remaining S/U balance (in terms of number of modular credits)."
 
 
 class LetterGrade(Enum):
@@ -39,8 +56,8 @@ class LetterGrade(Enum):
     D_PLUS = 1.5
     D = 1.0
     F = 0
-    S = 1000
-    U = 1001
+    S = 0
+    U = 0
 
 
 class Module():
@@ -57,6 +74,13 @@ class Module():
 
     def get_credits(self):
         return self.credits
+
+    def su(self):
+        su_grade = LetterGrade.S if self.letter_grade.value >= LetterGrade.C.value else LetterGrade.U
+        return Module(self.module_code, su_grade, 0)
+
+    def is_sued(self):
+        return self.letter_grade is LetterGrade.S or self.letter_grade is LetterGrade.U
 
 
 def to_letter_grade(letter_grade_string: str):
@@ -91,6 +115,8 @@ def calculate_semester_gpa(modules: list):
     grade_credit_product = 0
     credit_sum = 0
     for module in modules:
+        if module.is_sued():
+            continue
         grade_credit_product += module.get_letter_grade().value * module.get_credits()
         credit_sum += module.get_credits()
     return float(grade_credit_product) / float(credit_sum)
@@ -100,23 +126,62 @@ def calculate_cumulative_gpa(modules: list, prior_cum_gpa: float, prior_credits:
     grade_credit_product = prior_cum_gpa * prior_credits
     credit_sum = prior_credits
     for module in modules:
+        if module.is_sued():
+            continue
         grade_credit_product += module.get_letter_grade().value * module.get_credits()
         credit_sum += module.get_credits()
     return float(grade_credit_product) / float(credit_sum)
 
 
+def get_module_subsets(modules: list):
+    return list(itertools.chain.from_iterable(itertools.combinations(modules, r) for r in range(len(modules) + 1)))
+
+
+def exceeds_su_balance(selected_modules_to_su, balance):
+    return sum(map(lambda module: module.get_credits(), selected_modules_to_su)) > balance
+
+
+def su_modules(current_modules: iter, selected_modules_to_su: iter):
+    new_modules = current_modules.copy()
+    for mod in selected_modules_to_su:
+        sued_mod = mod.su()
+        new_modules = [sued_mod if m.get_module_code() is mod.get_module_code() else m for m in new_modules]
+    return new_modules
+
+
 print(WELCOME_MESSAGE)
 
+# Request for all relevant information
 prior_cumulative_gpa = float(input(REQUEST_PRIOR_CUMULATIVE_GPA))
 prior_credits = int(input(REQUEST_PRIOR_CREDITS))
 num_current_modules = int(input(REQUEST_NUM_CURRENT_MODULES))
+su_balance = int(input(REQUEST_SU_BALANCE))
 
+# Request for results of modules taken this semester
 print(REQUEST_CURRENT_RESULTS)
 current_results = receive_results(num_current_modules)
 
+# Output current semester and cumulative GPA
 print(SEMESTER_GPA_PREFIX + str(calculate_semester_gpa(current_results)))
 print(CUMULATIVE_GPA_PREFIX + str(calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)))
 
+# Print all available S/U combinations
+combinations = get_module_subsets(current_results)
 
+for combination in combinations:
 
+    # Check if selected modules to S/U exceeds your S/U balance
+    if exceeds_su_balance(combination, su_balance):
+        continue
+
+    # Replace selected modules in results list with their S/U-ed version
+    new_results = su_modules(current_results, combination)
+
+    new_semester_gpa = calculate_semester_gpa(new_results)
+    new_cumulative_gpa = calculate_cumulative_gpa(new_results, prior_cumulative_gpa, prior_credits)
+
+    module_code_list_str = str(list(map(lambda m: m.get_module_code(), combination))) if combination else "nothing"
+    print("If you S/U " + module_code_list_str
+          + ", your semester and cumulative GPA will be "
+          + str(new_semester_gpa) + " and " + str(new_cumulative_gpa) + " respectively.")
 
