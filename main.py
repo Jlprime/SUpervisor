@@ -19,12 +19,12 @@ SPACE = " "
 
 WELCOME_MESSAGE = "Welcome to SUpervisor!"
 
-FIRST_SEMESTER_CONDITION_MESSAGE = "If this is your first semester, input 0. "
+FIRST_SEMESTER_CONDITION_MESSAGE = "If this is your first semester, input 0."
 
-REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginning of this semester. " \
+REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginning of this semester." \
                                + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
 
-REQUEST_PRIOR_CREDITS = "Please enter the number of credits contributing to your CAP at the beginning of this semester. " \
+REQUEST_PRIOR_CREDITS = "Please enter the number of credits contributing to your CAP at the beginning of this semester." \
                         + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
 
 REQUEST_NUM_CURRENT_MODULES = "Please enter the number of modules taken this semester. "
@@ -41,7 +41,7 @@ SEMESTER_GPA_PREFIX = "Semester GPA: "
 
 CUMULATIVE_GPA_PREFIX = "Cumulative GPA: "
 
-REQUEST_SU_BALANCE = "Please enter your remaining S/U balance (in terms of number of modular credits). "
+REQUEST_SU_BALANCE = "Please enter your remaining S/U balance (in terms of number of modular credits)."
 
 MAX_CAP = 5.0
 
@@ -177,45 +177,34 @@ def su_modules(current_modules: iter, selected_modules_to_su: iter):
         new_modules = [sued_mod if m.get_module_code() is mod.get_module_code() else m for m in new_modules]
     return new_modules
 
-while True:
 
-    print(WELCOME_MESSAGE)
+print(WELCOME_MESSAGE)
 
-    # Request for all relevant information
-    prior_cumulative_gpa = float(input(REQUEST_PRIOR_CUMULATIVE_GPA))
-    prior_credits = int(input(REQUEST_PRIOR_CREDITS))
-    num_current_modules = int(input(REQUEST_NUM_CURRENT_MODULES))
-    su_balance = int(input(REQUEST_SU_BALANCE))
+# Request for all relevant information
+prior_cumulative_gpa = float(input(REQUEST_PRIOR_CUMULATIVE_GPA))
+prior_credits = int(input(REQUEST_PRIOR_CREDITS))
+num_current_modules = int(input(REQUEST_NUM_CURRENT_MODULES))
+su_balance = int(input(REQUEST_SU_BALANCE))
 
-    # Request for results of modules taken this semester
-    print(REQUEST_CURRENT_RESULTS)
-    current_results = receive_results(num_current_modules)
+# Request for results of modules taken this semester
+print(REQUEST_CURRENT_RESULTS)
+current_results = receive_results(num_current_modules)
 
-    # Output current semester and cumulative GPA
-    current_semester_gpa = calculate_semester_gpa(current_results)
-    current_cumulative_gpa = calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)
-    print(SEMESTER_GPA_PREFIX + str(current_semester_gpa))
-    print(CUMULATIVE_GPA_PREFIX + str(current_cumulative_gpa))
+# Output current semester and cumulative GPA
+current_semester_gpa = calculate_semester_gpa(current_results)
+current_cumulative_gpa = calculate_cumulative_gpa(current_results, prior_cumulative_gpa, prior_credits)
+print(SEMESTER_GPA_PREFIX + str(current_semester_gpa))
+print(CUMULATIVE_GPA_PREFIX + str(current_cumulative_gpa))
 
-    # Print all available S/U combinations
-    combinations = get_module_subsets(current_results)
-    for combination in combinations:
-        if has_exceeded_su_balance(combination, su_balance):
-            continue
-        su_combination = SuCombination(current_results, combination)
-        is_useful = su_combination.get_new_semester_gpa() >= current_semester_gpa \
-                    and su_combination.get_new_cumulative_gpa() >= current_cumulative_gpa
-        if is_useful:
-            print(su_combination.get_statistics_str())
-
-
-    while True:
-        answer = input('\nRun again? (Y/N): ')
-        if answer in ('Y', 'N', 'y', 'n'):
-            break
-        print ('Invalid input.')
-    if answer in ('Y','y'):
+# Print all available S/U combinations
+combinations = get_module_subsets(current_results)
+for combination in combinations:
+    if has_exceeded_su_balance(combination, su_balance):
         continue
-    else:
-        print ('Goodbye.')
-        break
+    su_combination = SuCombination(current_results, combination)
+    is_useful = su_combination.get_new_semester_gpa() >= current_semester_gpa \
+                and su_combination.get_new_cumulative_gpa() >= current_cumulative_gpa
+    if is_useful:
+        print(su_combination.get_statistics_str())
+
+
