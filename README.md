@@ -1,5 +1,5 @@
 # SUpervisor
-Optimises your NUS CAP by providing you your top three best S/U options.
+Optimises your NUS CAP by evaluating your best S/U options.
 
 ## Usage Instructions
 I haven't made the GUI for this program yet. This is just a bare-bones, command-line script that can optimise your CAP if you are too demoralized to evaluate your S/U options manually. 
