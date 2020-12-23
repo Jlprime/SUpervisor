@@ -11,7 +11,7 @@ how each combination will affect your CAP.
 
 Enjoy, and don't be too demoralized about your CAP, yeah? Life is short.
 
-## Disclaimer
+## Huge Disclaimer and Declaration of Indemnity
 Nobody has tested this program out yet. I cannot guarantee this program's accuracy, as it was coded in one day based on my limited understanding of the GPA and S/U system of NUS.
 Also it was coded out of desperation because I am way too lazy to evaluate my S/U options manually, but I know that if I don't at least put in some effort to find out what my options are,
 I will eventually feel bad. Can relate? Lets go out and have a drink someday and talk about it.
