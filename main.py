@@ -27,7 +27,7 @@ REQUEST_PRIOR_CUMULATIVE_GPA = "Please enter your cumulative GPA at the beginnin
 REQUEST_PRIOR_CREDITS = "Please enter the number of credits contributing to your CAP at the beginning of this semester." \
                         + SPACE + FIRST_SEMESTER_CONDITION_MESSAGE
 
-REQUEST_NUM_CURRENT_MODULES = "Please enter the number of modules taken this semester. "
+REQUEST_NUM_CURRENT_MODULES = "Please enter the number of modules taken this semester."
 
 MODULE_ENTRY_FORMAT = "[MODULE CODE] [LETTER GRADE] [NO. OF MODULAR CREDITS]"
 
