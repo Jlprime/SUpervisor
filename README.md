@@ -17,3 +17,6 @@ Also it was coded out of desperation because I am way too lazy to evaluate my S/
 I will eventually feel bad. Can relate? Lets go out and have a drink someday and talk about it.
 
 If anybody is willing to read my code and finds a logical flaw, please let me know. I will be very happy and will give you a follow on your GitHub and give you free CS2030 tuition.
+
+## Call for Help
+Actually, you know what? I am too lazy to code a GUI for this. If somebody is interested and wants to add some stuff to their portfolio, for you know, internships and stuff, feel free to clone this repository and make one for me. Make a pull request to this repository and I will be very, very happy. We can then meet up and discuss starting up a company together.
